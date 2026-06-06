@@ -1,0 +1,43 @@
+# OS / Editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Environment / Secrets
+.env
+.env.*
+!.env.example
+private/
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Jupyter
+.ipynb_checkpoints/
+temp.ipynb
+
+# Local artifacts / caches
+cache/
+image/debug/
+*.log
+*.zip
+
+# Vector DB / serialized indexes
+*.faiss
+*.pkl
+faiss_index*/
+my_faiss_index_test/
