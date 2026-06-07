@@ -3,10 +3,10 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>&#49688;&#54617;&#47928;&#51228; &#45813;&#50504;&#49440;&#53469;</title>
+  <title>수학문제 응시</title>
   <style>
     :root {
-      --bg: #f3f4f6;
+      --bg: #f5f5f5;
       --paper: #ffffff;
       --ink: #111827;
       --muted: #4b5563;
@@ -14,6 +14,7 @@
       --green: #008000;
       --blue: #1d4ed8;
       --soft: #eef4ff;
+      --short: #fff7ed;
     }
     * { box-sizing: border-box; }
     html, body { height: 100%; }
@@ -25,28 +26,94 @@
       overflow: hidden;
     }
     button, input { font: inherit; }
-    .layout {
+    .hidden { display: none !important; }
+    .start-screen {
       height: 100%;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+    }
+    .start-box {
+      width: min(720px, 100%);
+      background: var(--paper);
+      border: 1px solid var(--line);
+      padding: 20px;
+    }
+    .start-box h1 {
+      margin: 0 0 16px;
+      font-size: 20px;
+      color: var(--green);
+      text-align: center;
+    }
+    .file-list {
+      display: grid;
+      gap: 8px;
+    }
+    .file-item {
+      min-height: 44px;
+      border: 1px solid var(--line);
+      background: #fff;
+      cursor: pointer;
+      text-align: left;
+      padding: 8px 10px;
+    }
+    .file-item:hover {
+      background: var(--soft);
+    }
+    .exam-screen {
+      height: 100%;
+      display: grid;
+      grid-template-rows: 60px minmax(0, 1fr) 62px;
+    }
+    .topbar {
+      border: 1px solid var(--line);
+      border-bottom: 0;
+      background: var(--paper);
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: center;
+      padding: 0 14px;
+      gap: 12px;
+    }
+    .top-center {
+      text-align: center;
+      font-weight: 800;
+      color: var(--green);
+    }
+    .timer {
+      color: #111;
+      font-weight: 500;
+      margin-left: 12px;
+    }
+    .home-btn {
+      min-width: 64px;
+      min-height: 32px;
+      border: 1px solid var(--green);
+      background: #fff;
+      cursor: pointer;
+    }
+    .main-layout {
+      min-height: 0;
       display: grid;
       grid-template-columns: minmax(0, 1fr) 132px;
       gap: 4px;
-      padding: 2px;
+      padding: 0 4px;
     }
     .question-area {
       min-height: 0;
       background: var(--paper);
       border: 1px solid var(--line);
       display: grid;
-      grid-template-rows: auto minmax(0, 1fr);
+      grid-template-rows: auto minmax(0, 1fr) auto;
     }
     .question-head {
-      min-height: 38px;
+      min-height: 34px;
       border-bottom: 1px solid var(--line);
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 8px;
-      padding: 6px 10px;
+      padding: 5px 10px;
     }
     .question-title {
       font-weight: 800;
@@ -57,10 +124,20 @@
       font-size: 12px;
       white-space: nowrap;
     }
+    .explain-btn {
+      min-width: 72px;
+      min-height: 28px;
+      border: 1px solid var(--blue);
+      background: #fff;
+      color: var(--blue);
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 700;
+    }
     .problem-view {
       min-height: 0;
       overflow: auto;
-      padding: 14px;
+      padding: 1cm 14px 14px;
       background: #fff;
     }
     .problem-image {
@@ -69,12 +146,41 @@
       height: auto;
       margin: 0 auto;
     }
+    .short-answer-panel {
+      display: none;
+      border-top: 1px solid var(--line);
+      background: var(--short);
+      padding: 10px 12px;
+    }
+    .short-answer-panel.visible {
+      display: block;
+    }
+    .short-title {
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+    .short-inputs {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(120px, 1fr));
+      gap: 8px;
+    }
+    .short-field {
+      display: grid;
+      gap: 5px;
+      font-weight: 700;
+    }
+    .short-field input {
+      min-height: 34px;
+      border: 1px solid var(--line);
+      padding: 4px 8px;
+      background: #fff;
+    }
     .answer-sheet {
       min-height: 0;
       background: var(--paper);
       border: 1px solid var(--line);
       display: grid;
-      grid-template-rows: 30px minmax(0, 1fr) auto;
+      grid-template-rows: 30px minmax(0, 1fr) 42px;
       overflow: hidden;
     }
     .subject {
@@ -97,6 +203,10 @@
       border-bottom: 1px solid #e5e7eb;
       background: #fff;
     }
+    .answer-row.short-row {
+      grid-template-columns: 25px 1fr;
+      background: var(--short);
+    }
     .answer-row.current {
       background: var(--soft);
       outline: 2px solid rgba(29, 78, 216, .25);
@@ -115,6 +225,15 @@
       cursor: pointer;
       padding: 0;
       font-size: 14px;
+    }
+    .short-open {
+      height: 24px;
+      border: 0;
+      background: transparent;
+      cursor: pointer;
+      color: #9a3412;
+      font-weight: 800;
+      font-size: 12px;
     }
     .bubble {
       position: relative;
@@ -143,95 +262,462 @@
       color: #fff;
       font-weight: 800;
     }
-    .sheet-actions {
+    .submit-wrap {
       display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 4px;
-      padding: 4px;
+      place-items: center;
       border-top: 1px solid var(--line);
+      background: #fff;
     }
-    .sheet-actions button {
+    .submit-btn {
+      min-width: 78px;
+      min-height: 30px;
+      border: 1px solid var(--line);
+      background: #fff;
+      cursor: pointer;
+    }
+    .bottom-nav {
+      border: 1px solid var(--line);
+      border-top: 0;
+      background: var(--paper);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 22px;
+    }
+    .nav-btn {
+      min-width: 45px;
+      min-height: 31px;
+      border: 1px solid var(--line);
+      background: #fff;
+      cursor: pointer;
+    }
+    .score-modal-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 50;
+      display: grid;
+      place-items: center;
+      padding: 20px;
+      background: rgba(17, 24, 39, .38);
+    }
+    .score-modal {
+      width: min(360px, 100%);
+      background: #fff;
+      border: 1px solid var(--line);
+      padding: 18px;
+      box-shadow: 0 18px 40px rgba(17, 24, 39, .2);
+    }
+    .score-modal h2 {
+      margin: 0 0 14px;
+      color: var(--green);
+      font-size: 19px;
+      text-align: center;
+    }
+    .score-main {
+      display: grid;
+      gap: 8px;
+      margin-bottom: 16px;
+      text-align: center;
+    }
+    .score-value {
+      font-size: 32px;
+      font-weight: 800;
+      color: var(--ink);
+    }
+    .score-detail {
+      color: var(--muted);
+      font-size: 14px;
+    }
+    .score-close {
+      width: 100%;
+      min-height: 34px;
+      border: 1px solid var(--green);
+      background: #fff;
+      cursor: pointer;
+    }
+    .explanation-modal-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 60;
+      display: grid;
+      place-items: center;
+      padding: 18px;
+      background: rgba(17, 24, 39, .45);
+    }
+    .explanation-modal {
+      width: min(980px, 100%);
+      height: min(760px, 92vh);
+      background: #fff;
+      border: 1px solid var(--line);
+      display: grid;
+      grid-template-rows: 42px minmax(0, 1fr);
+    }
+    .explanation-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 6px 10px;
+      border-bottom: 1px solid var(--line);
+      font-weight: 800;
+      color: var(--green);
+    }
+    .explanation-close {
+      min-width: 54px;
       min-height: 28px;
       border: 1px solid var(--line);
       background: #fff;
       cursor: pointer;
-      font-size: 12px;
+    }
+    .explanation-body {
+      min-height: 0;
+      overflow: auto;
+      padding: 12px;
+      background: #fff;
+    }
+    .explanation-image {
+      display: block;
+      max-width: 100%;
+      height: auto;
+      margin: 0 auto;
+    }
+    .explanation-empty {
+      min-height: 160px;
+      display: grid;
+      place-items: center;
+      color: var(--muted);
+    }
+    .explanation-frame {
+      width: 100%;
+      height: 100%;
+      border: 0;
+      background: #fff;
     }
     @media (max-width: 760px) {
       body { overflow: auto; }
-      .layout {
+      .exam-screen {
         min-height: 100%;
         height: auto;
+        grid-template-rows: auto auto auto;
+      }
+      .topbar {
+        grid-template-columns: 1fr;
+        padding: 10px;
+      }
+      .main-layout {
         grid-template-columns: 1fr;
       }
       .answer-sheet {
         min-height: 340px;
       }
+      .short-inputs {
+        grid-template-columns: 1fr;
+      }
     }
   </style>
 </head>
 <body>
-  <main class="layout">
-    <section class="question-area">
-      <div class="question-head">
-        <div class="question-title" id="questionTitle">1&#48264; &#47928;&#51228;</div>
-        <div class="hint"><span id="answeredCount">0</span> / 20</div>
-      </div>
-      <div class="problem-view">
-        <img id="problemImage" class="problem-image" alt="&#49688;&#54617; &#47928;&#51228;" />
-      </div>
-    </section>
+  <section id="startScreen" class="start-screen">
+    <div class="start-box">
+      <h1>문제지 파일 목록</h1>
+      <div id="fileList" class="file-list"></div>
+    </div>
+  </section>
 
-    <aside class="answer-sheet">
-      <div class="subject">1&#44284;&#47785;</div>
-      <div class="answer-rows" id="answerRows"></div>
-      <div class="sheet-actions">
-        <button id="resetBtn" type="button">&#52488;&#44592;&#54868;</button>
-        <button id="nextBtn" type="button">&#45796;&#51020;</button>
+  <section id="examScreen" class="exam-screen hidden">
+    <header class="topbar">
+      <div class="top-center">
+        <span id="examFileName"></span>
+        <span class="timer">Timer <span id="timerText">50분 00초</span></span>
       </div>
-    </aside>
-  </main>
+      <button id="homeBtn" class="home-btn" type="button">첫화면</button>
+    </header>
+
+    <main class="main-layout">
+      <section class="question-area">
+        <div class="question-head">
+          <div class="question-title" id="questionTitle">1번 문제</div>
+          <button id="explanationBtn" class="explain-btn hidden" type="button">해설보기</button>
+          <div class="hint"><span id="answeredCount">0</span> / 30</div>
+        </div>
+        <div class="problem-view">
+          <img id="problemImage" class="problem-image" alt="수학 문제" />
+        </div>
+        <div id="shortAnswerPanel" class="short-answer-panel"></div>
+      </section>
+
+      <aside class="answer-sheet">
+        <div class="subject">1과목</div>
+        <div class="answer-rows" id="answerRows"></div>
+        <div class="submit-wrap">
+          <button id="submitBtn" class="submit-btn" type="button">답안제출</button>
+        </div>
+      </aside>
+    </main>
+
+    <footer class="bottom-nav">
+      <button id="prevBtn" class="nav-btn" type="button">이전</button>
+      <button id="nextBtn" class="nav-btn" type="button">다음</button>
+    </footer>
+  </section>
+
+  <div id="scoreModal" class="score-modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="scoreTitle">
+    <div class="score-modal">
+      <h2 id="scoreTitle">채점 결과</h2>
+      <div class="score-main">
+        <div id="scoreValue" class="score-value">0점</div>
+        <div id="scoreDetail" class="score-detail"></div>
+      </div>
+      <button id="scoreCloseBtn" class="score-close" type="button">확인</button>
+    </div>
+  </div>
+
+  <div id="explanationModal" class="explanation-modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="explanationTitle">
+    <div class="explanation-modal">
+      <div class="explanation-head">
+        <span id="explanationTitle">해설</span>
+        <button id="explanationCloseBtn" class="explanation-close" type="button">닫기</button>
+      </div>
+      <div id="explanationBody" class="explanation-body"></div>
+    </div>
+  </div>
 
   <script>
-    const problems = [{"number": 1, "page": 1, "image": "assets/problem_01.png", "width": 749, "height": 238}, {"number": 2, "page": 1, "image": "assets/problem_02.png", "width": 749, "height": 336}, {"number": 3, "page": 1, "image": "assets/problem_03.png", "width": 746, "height": 315}, {"number": 4, "page": 1, "image": "assets/problem_04.png", "width": 746, "height": 336}, {"number": 5, "page": 2, "image": "assets/problem_05.png", "width": 749, "height": 378}, {"number": 6, "page": 2, "image": "assets/problem_06.png", "width": 749, "height": 385}, {"number": 7, "page": 2, "image": "assets/problem_07.png", "width": 746, "height": 378}, {"number": 8, "page": 3, "image": "assets/problem_08.png", "width": 749, "height": 343}, {"number": 9, "page": 3, "image": "assets/problem_09.png", "width": 749, "height": 441}, {"number": 10, "page": 3, "image": "assets/problem_10.png", "width": 746, "height": 343}, {"number": 11, "page": 4, "image": "assets/problem_11.png", "width": 749, "height": 364}, {"number": 12, "page": 4, "image": "assets/problem_12.png", "width": 746, "height": 630}, {"number": 13, "page": 5, "image": "assets/problem_13.png", "width": 749, "height": 371}, {"number": 14, "page": 5, "image": "assets/problem_14.png", "width": 746, "height": 1155}, {"number": 15, "page": 6, "image": "assets/problem_15.png", "width": 749, "height": 399}, {"number": 16, "page": 6, "image": "assets/problem_16.png", "width": 746, "height": 490}, {"number": 17, "page": 7, "image": "assets/problem_17.png", "width": 749, "height": 392}, {"number": 18, "page": 7, "image": "assets/problem_18.png", "width": 746, "height": 910}, {"number": 19, "page": 8, "image": "assets/problem_19.png", "width": 749, "height": 434}, {"number": 20, "page": 8, "image": "assets/problem_20.png", "width": 746, "height": 434}];
-    const total = 20;
-    const storageKey = "math-20-answer-sheet-ui";
-    const labels = ["①", "②", "③", "④", "⑤"];
+    const examFiles = [{"id": "math_2026_06_g1", "name": "2026학년도6월고1전국연합학력평가문제지.pdf", "explanationPdf": "answer_explanation.pdf", "problems": [{"number": 1, "page": 1, "image": "assets/problem_01.png", "width": 749, "height": 315, "kind": "choice", "labels": [], "correct": "5", "score": 2, "explanation": {"image": "assets/explanation_01.png", "width": 350, "height": 42}}, {"number": 2, "page": 1, "image": "assets/problem_02.png", "width": 749, "height": 476, "kind": "choice", "labels": [], "correct": "1", "score": 2, "explanation": {"image": "assets/explanation_02.png", "width": 350, "height": 105}}, {"number": 3, "page": 1, "image": "assets/problem_03.png", "width": 746, "height": 315, "kind": "choice", "labels": [], "correct": "4", "score": 2, "explanation": {"image": "assets/explanation_03.png", "width": 350, "height": 102}}, {"number": 4, "page": 1, "image": "assets/problem_04.png", "width": 746, "height": 476, "kind": "choice", "labels": [], "correct": "3", "score": 3, "explanation": {"image": "assets/explanation_04.png", "width": 350, "height": 126}}, {"number": 5, "page": 2, "image": "assets/problem_05.png", "width": 749, "height": 378, "kind": "choice", "labels": [], "correct": "4", "score": 3, "explanation": {"image": "assets/explanation_05.png", "width": 350, "height": 159}}, {"number": 6, "page": 2, "image": "assets/problem_06.png", "width": 749, "height": 525, "kind": "choice", "labels": [], "correct": "2", "score": 3, "explanation": {"image": "assets/explanation_06.png", "width": 350, "height": 119}}, {"number": 7, "page": 2, "image": "assets/problem_07.png", "width": 746, "height": 378, "kind": "choice", "labels": [], "correct": "3", "score": 3, "explanation": {"image": "assets/explanation_07.png", "width": 350, "height": 207}}, {"number": 8, "page": 3, "image": "assets/problem_08.png", "width": 749, "height": 343, "kind": "choice", "labels": [], "correct": "2", "score": 3, "explanation": {"image": "assets/explanation_08.png", "width": 320, "height": 221}}, {"number": 9, "page": 3, "image": "assets/problem_09.png", "width": 749, "height": 581, "kind": "choice", "labels": [], "correct": "3", "score": 3, "explanation": {"image": "assets/explanation_09.png", "width": 320, "height": 283}}, {"number": 10, "page": 3, "image": "assets/problem_10.png", "width": 746, "height": 343, "kind": "choice", "labels": [], "correct": "1", "score": 3, "explanation": {"image": "assets/explanation_10.png", "width": 320, "height": 180}}, {"number": 11, "page": 4, "image": "assets/problem_11.png", "width": 749, "height": 364, "kind": "choice", "labels": [], "correct": "1", "score": 3, "explanation": {"image": "assets/explanation_11.png", "width": 320, "height": 185}}, {"number": 12, "page": 4, "image": "assets/problem_12.png", "width": 746, "height": 630, "kind": "choice", "labels": [], "correct": "3", "score": 3, "explanation": {"image": "assets/explanation_12.png", "width": 320, "height": 306}}, {"number": 13, "page": 5, "image": "assets/problem_13.png", "width": 749, "height": 371, "kind": "choice", "labels": [], "correct": "4", "score": 3, "explanation": {"image": "assets/explanation_13.png", "width": 360, "height": 426}}, {"number": 14, "page": 5, "image": "assets/problem_14.png", "width": 746, "height": 1155, "kind": "choice", "labels": [], "correct": "4", "score": 4, "explanation": {"image": "assets/explanation_14.png", "width": 360, "height": 515}}, {"number": 15, "page": 6, "image": "assets/problem_15.png", "width": 749, "height": 399, "kind": "choice", "labels": [], "correct": "5", "score": 4, "explanation": {"image": "assets/explanation_15.png", "width": 360, "height": 329}}, {"number": 16, "page": 6, "image": "assets/problem_16.png", "width": 746, "height": 490, "kind": "choice", "labels": [], "correct": "5", "score": 4, "explanation": {"image": "assets/explanation_16.png", "width": 350, "height": 255}}, {"number": 17, "page": 7, "image": "assets/problem_17.png", "width": 749, "height": 392, "kind": "choice", "labels": [], "correct": "4", "score": 4, "explanation": {"image": "assets/explanation_17.png", "width": 350, "height": 710}}, {"number": 18, "page": 7, "image": "assets/problem_18.png", "width": 746, "height": 910, "kind": "choice", "labels": [], "correct": "2", "score": 4, "explanation": {"image": "assets/explanation_18.png", "width": 350, "height": 209}}, {"number": 19, "page": 8, "image": "assets/problem_19.png", "width": 749, "height": 434, "kind": "choice", "labels": [], "correct": "1", "score": 4, "explanation": {"image": "assets/explanation_19.png", "width": 320, "height": 424}}, {"number": 20, "page": 8, "image": "assets/problem_20.png", "width": 746, "height": 434, "kind": "choice", "labels": [], "correct": "2", "score": 4, "explanation": {"image": "assets/explanation_20.png", "width": 320, "height": 558}}, {"number": 21, "page": 9, "image": "assets/problem_21.png", "width": 749, "height": 462, "kind": "choice", "labels": [], "correct": "1", "score": 4, "explanation": {"image": "assets/explanation_21.png", "width": 320, "height": 43}}, {"number": 22, "page": 9, "image": "assets/problem_22.png", "width": 746, "height": 364, "kind": "short", "labels": ["정답"], "correct": "15", "score": 3, "explanation": {"image": "assets/explanation_22.png", "width": 360, "height": 104}}, {"number": 23, "page": 9, "image": "assets/problem_23.png", "width": 746, "height": 350, "kind": "short", "labels": ["정답"], "correct": "7", "score": 3, "explanation": {"image": "assets/explanation_23.png", "width": 360, "height": 100}}, {"number": 24, "page": 10, "image": "assets/problem_24.png", "width": 749, "height": 322, "kind": "short", "labels": ["정답"], "correct": "6", "score": 3, "explanation": {"image": "assets/explanation_24.png", "width": 360, "height": 121}}, {"number": 25, "page": 10, "image": "assets/problem_25.png", "width": 749, "height": 532, "kind": "short", "labels": ["정답"], "correct": "18", "score": 3, "explanation": {"image": "assets/explanation_25.png", "width": 360, "height": 112}}, {"number": 26, "page": 10, "image": "assets/problem_26.png", "width": 746, "height": 364, "kind": "short", "labels": ["정답"], "correct": "11", "score": 4, "explanation": {"image": "assets/explanation_26.png", "width": 350, "height": 455}}, {"number": 27, "page": 11, "image": "assets/problem_27.png", "width": 749, "height": 924, "kind": "short", "labels": ["정답"], "correct": "82", "score": 4, "explanation": {"image": "assets/explanation_27.png", "width": 350, "height": 300}}, {"number": 28, "page": 11, "image": "assets/problem_28.png", "width": 746, "height": 378, "kind": "short", "labels": ["정답"], "correct": "143", "score": 4, "explanation": {"image": "assets/explanation_28.png", "width": 350, "height": 327}}, {"number": 29, "page": 12, "image": "assets/problem_29.png", "width": 749, "height": 434, "kind": "short", "labels": ["정답"], "correct": "84", "score": 4, "explanation": {"image": "assets/explanation_29.png", "width": 680, "height": 307}}, {"number": 30, "page": 12, "image": "assets/problem_30.png", "width": 746, "height": 434, "kind": "short", "labels": ["정답"], "correct": "23", "score": 4, "explanation": {"image": "assets/explanation_30.png", "width": 680, "height": 880}}]}];
+    const total = 30;
+    const examSeconds = 50 * 60;
+    const labels = ["\u2460", "\u2461", "\u2462", "\u2463", "\u2464"];
+    let activeExam = examFiles[0];
     let current = 1;
-    let answers = loadAnswers();
+    let answers = {};
+    let remainingSeconds = examSeconds;
+    let timerId = null;
+    let reviewMode = false;
+    let reviewNumbers = [];
+    let lastGrading = null;
+    let gradingConfirmCount = 0;
+    let explanationEnabled = false;
+
+    function storageKey() {
+      return `math-answer-sheet-${activeExam.id}`;
+    }
 
     function loadAnswers() {
       try {
-        return JSON.parse(localStorage.getItem(storageKey) || "{}");
+        return JSON.parse(localStorage.getItem(storageKey()) || "{}");
       } catch {
         return {};
       }
     }
 
     function saveAnswers() {
-      localStorage.setItem(storageKey, JSON.stringify(answers));
+      localStorage.setItem(storageKey(), JSON.stringify(answers));
       renderRows();
       updateCount();
     }
 
+    function answerIsFilled(value) {
+      if (!value) return false;
+      if (typeof value === "string") return value.trim().length > 0;
+      return Object.values(value).some(text => String(text || "").trim().length > 0);
+    }
+
     function updateCount() {
-      document.getElementById("answeredCount").textContent = Object.keys(answers).length;
+      const visible = getVisibleNumbers();
+      const count = visible.filter(number => answerIsFilled(answers[number])).length;
+      document.getElementById("answeredCount").textContent = count;
+      const denominator = reviewMode ? reviewNumbers.length : total;
+      document.querySelector(".hint").lastChild.textContent = ` / ${denominator}`;
     }
 
     function getProblem(number) {
-      return problems.find(problem => problem.number === number);
+      return activeExam.problems.find(problem => problem.number === number);
+    }
+
+    function getVisibleNumbers() {
+      if (reviewMode && reviewNumbers.length > 0) return reviewNumbers;
+      return Array.from({ length: total }, (_, index) => index + 1);
+    }
+
+    function sanitizeAnswers() {
+      activeExam.problems.forEach(problem => {
+        const value = answers[problem.number];
+        if (value === undefined) return;
+        if (problem.kind === "choice" && typeof value !== "string") {
+          delete answers[problem.number];
+        }
+        if (problem.kind === "short" && (typeof value !== "object" || Array.isArray(value))) {
+          delete answers[problem.number];
+        }
+      });
+    }
+
+    function formatTime(seconds) {
+      const safe = Math.max(0, seconds);
+      const minutes = Math.floor(safe / 60);
+      const rest = safe % 60;
+      return `${minutes}분 ${String(rest).padStart(2, "0")}초`;
+    }
+
+    function startTimer(reset = false) {
+      if (reset) remainingSeconds = examSeconds;
+      document.getElementById("timerText").textContent = formatTime(remainingSeconds);
+      if (timerId) clearInterval(timerId);
+      timerId = setInterval(() => {
+        remainingSeconds -= 1;
+        document.getElementById("timerText").textContent = formatTime(remainingSeconds);
+        if (remainingSeconds <= 0) {
+          clearInterval(timerId);
+          timerId = null;
+          alert("시험 시간이 종료되었습니다.");
+        }
+      }, 1000);
+    }
+
+    function showStartScreen() {
+      if (timerId) {
+        clearInterval(timerId);
+        timerId = null;
+      }
+      reviewMode = false;
+      reviewNumbers = [];
+      lastGrading = null;
+      gradingConfirmCount = 0;
+      explanationEnabled = false;
+      document.getElementById("examScreen").classList.add("hidden");
+      document.getElementById("startScreen").classList.remove("hidden");
+      renderFileList();
+    }
+
+    function startExam(examId) {
+      activeExam = examFiles.find(file => file.id === examId) || examFiles[0];
+      answers = loadAnswers();
+      reviewMode = false;
+      reviewNumbers = [];
+      lastGrading = null;
+      gradingConfirmCount = 0;
+      explanationEnabled = false;
+      sanitizeAnswers();
+      saveAnswers();
+      current = 1;
+      document.getElementById("examFileName").textContent = activeExam.name;
+      document.getElementById("startScreen").classList.add("hidden");
+      document.getElementById("examScreen").classList.remove("hidden");
+      startTimer(true);
+      updateCount();
+      selectProblem(1);
+    }
+
+    function renderFileList() {
+      const box = document.getElementById("fileList");
+      box.innerHTML = "";
+      examFiles.forEach(file => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "file-item";
+        button.textContent = file.name;
+        button.addEventListener("click", () => startExam(file.id));
+        box.appendChild(button);
+      });
+    }
+
+    function labelText(label) {
+      if (label === "정답") return "정답";
+      return `(${label})`;
+    }
+
+    function placeholderText(label) {
+      if (label === "정답") return "정답";
+      return `${labelText(label)} 정답`;
+    }
+
+    function renderShortAnswerPanel(problem) {
+      const panel = document.getElementById("shortAnswerPanel");
+      panel.innerHTML = "";
+      panel.classList.toggle("visible", problem.kind === "short");
+      if (problem.kind !== "short") return;
+
+      const title = document.createElement("div");
+      title.className = "short-title";
+      title.textContent = "단답형 정답 표시";
+      panel.appendChild(title);
+
+      const inputs = document.createElement("div");
+      inputs.className = "short-inputs";
+      const saved = answers[problem.number] || {};
+      problem.labels.forEach(label => {
+        const field = document.createElement("label");
+        field.className = "short-field";
+        field.innerHTML = `<span>${labelText(label)}</span>`;
+        const input = document.createElement("input");
+        input.type = "text";
+        input.value = saved[label] || "";
+        input.placeholder = placeholderText(label);
+        input.addEventListener("input", event => {
+          const currentAnswer = answers[problem.number] || {};
+          currentAnswer[label] = event.target.value;
+          answers[problem.number] = currentAnswer;
+          saveAnswers();
+        });
+        field.appendChild(input);
+        inputs.appendChild(field);
+      });
+      panel.appendChild(inputs);
+    }
+
+    function updateExplanationButton() {
+      const problem = getProblem(current);
+      const button = document.getElementById("explanationBtn");
+      const canShow =
+        reviewMode &&
+        explanationEnabled &&
+        problem &&
+        problem.explanation &&
+        problem.explanation.image &&
+        lastGrading &&
+        lastGrading.wrongNumbers.includes(current);
+      button.classList.toggle("hidden", !canShow);
+    }
+
+    function openExplanation() {
+      const problem = getProblem(current);
+      const explanation = problem && problem.explanation;
+      if (!explanation || !explanation.image) return;
+      const body = document.getElementById("explanationBody");
+      body.innerHTML = "";
+      document.getElementById("explanationTitle").textContent = `${current}번 해설`;
+
+      const image = document.createElement("img");
+      image.className = "explanation-image";
+      image.src = explanation.image;
+      image.width = explanation.width || 0;
+      image.height = explanation.height || 0;
+      image.alt = `${current}번 해설`;
+      body.appendChild(image);
+      document.getElementById("explanationModal").classList.remove("hidden");
+    }
+
+    function closeExplanation() {
+      document.getElementById("explanationBody").innerHTML = "";
+      document.getElementById("explanationModal").classList.add("hidden");
     }
 
     function selectProblem(number) {
-      current = number;
-      const problem = getProblem(number);
-      document.getElementById("questionTitle").textContent = `${number}번 문제`;
+      const visible = getVisibleNumbers();
+      if (reviewMode && visible.length > 0 && !visible.includes(number)) {
+        number = visible[0];
+      }
+      current = Math.min(total, Math.max(1, number));
+      const problem = getProblem(current);
+      document.getElementById("questionTitle").textContent = `${current}번 문제`;
       const image = document.getElementById("problemImage");
       image.src = problem.image;
       image.width = problem.width;
       image.height = problem.height;
-      image.alt = `${number}번 문제`;
+      image.alt = `${current}번 문제`;
+      renderShortAnswerPanel(problem);
       document.querySelector(".problem-view").scrollTop = 0;
+      updateExplanationButton();
       renderRows();
     }
 
@@ -245,11 +731,13 @@
     function renderRows() {
       const box = document.getElementById("answerRows");
       box.innerHTML = "";
-      for (let number = 1; number <= total; number++) {
+      getVisibleNumbers().forEach(number => {
+        const problem = getProblem(number);
         const row = document.createElement("div");
         row.className = "answer-row";
+        row.classList.toggle("short-row", problem.kind === "short");
         row.classList.toggle("current", number === current);
-        row.classList.toggle("answered", Boolean(answers[number]));
+        row.classList.toggle("answered", answerIsFilled(answers[number]));
 
         const num = document.createElement("button");
         num.type = "button";
@@ -258,36 +746,128 @@
         num.addEventListener("click", () => selectProblem(number));
         row.appendChild(num);
 
-        labels.forEach((label, index) => {
-          const value = String(index + 1);
-          const bubble = document.createElement("label");
-          bubble.className = "bubble";
-          bubble.title = `${number}번 ${value}번`;
-          bubble.innerHTML = `
-            <input type="radio" name="answer-${number}" value="${value}" ${answers[number] === value ? "checked" : ""} />
-            <span>${label}</span>
-          `;
-          bubble.querySelector("input").addEventListener("change", () => chooseAnswer(number, value));
-          row.appendChild(bubble);
-        });
+        if (problem.kind === "short") {
+          const open = document.createElement("button");
+          open.type = "button";
+          open.className = "short-open";
+          open.textContent = "단답";
+          open.addEventListener("click", () => selectProblem(number));
+          row.appendChild(open);
+        } else {
+          labels.forEach((label, index) => {
+            const value = String(index + 1);
+            const bubble = document.createElement("label");
+            bubble.className = "bubble";
+            bubble.title = `${number}번 ${value}번`;
+            bubble.innerHTML = `
+              <input type="radio" name="answer-${number}" value="${value}" ${answers[number] === value ? "checked" : ""} />
+              <span>${label}</span>
+            `;
+            bubble.querySelector("input").addEventListener("change", () => chooseAnswer(number, value));
+            row.appendChild(bubble);
+          });
+        }
 
         box.appendChild(row);
-      }
+      });
     }
 
-    document.getElementById("resetBtn").addEventListener("click", () => {
-      answers = {};
-      localStorage.removeItem(storageKey);
-      renderRows();
+    function normalizeForGrading(value) {
+      return String(value ?? "")
+        .trim()
+        .replace(/[０-９]/g, char => String(char.charCodeAt(0) - 0xff10))
+        .replace(/\s+/g, "");
+    }
+
+    function getStudentAnswer(problem) {
+      const value = answers[problem.number];
+      if (!value) return "";
+      if (problem.kind === "choice") return normalizeForGrading(value);
+      if (problem.labels.length === 1) {
+        return normalizeForGrading(value[problem.labels[0]] || "");
+      }
+      return normalizeForGrading(problem.labels.map(label => value[label] || "").join(""));
+    }
+
+    function gradeAnswers() {
+      let earned = 0;
+      let maxScore = 0;
+      let correctCount = 0;
+      const wrongNumbers = [];
+      activeExam.problems.forEach(problem => {
+        const score = Number(problem.score || 0);
+        const correct = normalizeForGrading(problem.correct);
+        const student = getStudentAnswer(problem);
+        maxScore += score;
+        if (correct && student === correct) {
+          earned += score;
+          correctCount += 1;
+        } else {
+          wrongNumbers.push(problem.number);
+        }
+      });
+      return { earned, maxScore, correctCount, wrongNumbers };
+    }
+
+    function showScoreModal(result, answeredCount) {
+      document.getElementById("scoreValue").textContent = `${result.earned}점`;
+      document.getElementById("scoreDetail").textContent =
+        `총점 ${result.maxScore}점 / 정답 ${result.correctCount}문항 / 응답 ${answeredCount}문항`;
+      document.getElementById("scoreModal").classList.remove("hidden");
+    }
+
+    function submitAnswers() {
+      const count = Object.values(answers).filter(answerIsFilled).length;
+      lastGrading = gradeAnswers();
+      showScoreModal(lastGrading, count);
+    }
+
+    function enterWrongReview() {
+      if (!lastGrading || lastGrading.wrongNumbers.length === 0) return;
+      reviewMode = true;
+      reviewNumbers = [...lastGrading.wrongNumbers];
+      selectProblem(reviewNumbers[0]);
       updateCount();
+      updateExplanationButton();
+    }
+
+    function moveProblem(direction) {
+      if (!reviewMode || reviewNumbers.length === 0) {
+        selectProblem(current + direction);
+        return;
+      }
+      const index = reviewNumbers.indexOf(current);
+      const nextIndex = Math.min(reviewNumbers.length - 1, Math.max(0, index + direction));
+      selectProblem(reviewNumbers[nextIndex]);
+    }
+
+    document.getElementById("homeBtn").addEventListener("click", showStartScreen);
+    document.getElementById("prevBtn").addEventListener("click", () => moveProblem(-1));
+    document.getElementById("nextBtn").addEventListener("click", () => moveProblem(1));
+    document.getElementById("submitBtn").addEventListener("click", submitAnswers);
+    document.getElementById("scoreCloseBtn").addEventListener("click", () => {
+      document.getElementById("scoreModal").classList.add("hidden");
+      gradingConfirmCount += 1;
+      if (gradingConfirmCount >= 2) {
+        explanationEnabled = true;
+      }
+      enterWrongReview();
+      updateExplanationButton();
+    });
+    document.getElementById("scoreModal").addEventListener("click", event => {
+      if (event.target.id === "scoreModal") {
+        event.currentTarget.classList.add("hidden");
+      }
+    });
+    document.getElementById("explanationBtn").addEventListener("click", openExplanation);
+    document.getElementById("explanationCloseBtn").addEventListener("click", closeExplanation);
+    document.getElementById("explanationModal").addEventListener("click", event => {
+      if (event.target.id === "explanationModal") {
+        closeExplanation();
+      }
     });
 
-    document.getElementById("nextBtn").addEventListener("click", () => {
-      selectProblem(current === total ? 1 : current + 1);
-    });
-
-    updateCount();
-    selectProblem(1);
+    renderFileList();
   </script>
 </body>
 </html>
