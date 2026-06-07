@@ -41,3 +41,4 @@ image/debug/
 *.pkl
 faiss_index*/
 my_faiss_index_test/
+.math_mock_exam_index.json
